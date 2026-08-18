@@ -7,3 +7,8 @@ FinalPilotApp.xcodeproj/xcuserdata/
 FinalPilotApp/StudySyncSnapshot.local.json
 data/study_sync_snapshot.local.json
 tools/sync_sources.local.json
+
+# Private learning dirs & local-only files - never push to public repo
+4.2-私人学习/
+CHANGELOG_版本更新历史.md
+.codex/
