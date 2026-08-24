@@ -48,10 +48,10 @@ struct CourseDetailView: View {
                             knowledgePointRow(point, color: AppTheme.courseColor(course.colorKey))
                         }
 
-                        SectionHeader(title: "推荐动作", subtitle: "把错题和项目话术合并处理")
+                        SectionHeader(title: "推荐动作", subtitle: "把错题和里程碑知识串联处理")
                         VStack(alignment: .leading, spacing: 8) {
                             Label("薄弱知识点先做 15 分钟主动回忆，再看解释。", systemImage: "brain.head.profile")
-                            Label("能用于校招项目讲解的概念，额外整理 3 句口语化说明。", systemImage: "briefcase")
+                            Label("与里程碑实践相关的概念，额外整理 3 句简明说明。", systemImage: "checklist")
                         }
                         .font(.subheadline)
                         .foregroundStyle(AppTheme.ink)

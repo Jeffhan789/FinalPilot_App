@@ -38,7 +38,7 @@ struct DashboardView: View {
                     Text("Exam Sprint Mode")
                         .font(.caption.weight(.bold))
                         .foregroundStyle(AppTheme.primary)
-                    Text("考试优先，面试保温")
+                    Text("考试优先，机动事务保温")
                         .font(.title2.weight(.bold))
                         .foregroundStyle(AppTheme.ink)
                 }
@@ -217,7 +217,7 @@ struct DashboardView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Label("C310 先考，今天必须把 Agent 基础和 Q1 真题入口打通。", systemImage: "exclamationmark.shield")
                 Label("E320 只晚一天，每天至少保留一个公式/算法闭环。", systemImage: "arrow.triangle.merge")
-                Label("校招已收进计划分支，5 月 14 前只在需要时做最低准备包。", systemImage: "calendar.badge.clock")
+                Label("里程碑已收进计划分支，5 月 14 前只在需要时做最低准备包。", systemImage: "calendar.badge.clock")
             }
             .font(.subheadline)
             .foregroundStyle(AppTheme.ink)

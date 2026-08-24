@@ -203,15 +203,15 @@ final class FinalPilotStore: ObservableObject {
         return attempt
     }
 
-    func addMockInterview() {
+    func addSampleMilestone() {
         let event = CareerEvent(
             id: UUID().uuidString,
-            company: "新增公司",
-            role: "iOS 开发实习",
-            round: "模拟技术面",
+            company: "新增里程碑",
+            role: "自定义事务",
+            round: "待执行",
             date: .finalPilotDate(month: 5, day: 10, hour: 15),
             importance: 3,
-            preparationStatus: "等待准备"
+            preparationStatus: "等待拆解"
         )
         _ = CareerEventEntity.fromCareerEvent(event, context: context)
         save()
@@ -381,7 +381,7 @@ func submitAnswer(...) -> QuizAttempt {
 | `toggleTask(_:)` | 数组索引修改 | 查询+修改实体 | 需先 Fetch 再 Save |
 | `deferTask(_:)` | 数组索引修改 | 查询+修改实体 | 需先 Fetch 再 Save |
 | `submitAnswer(...)` | 插入数组+更新数组 | 创建实体+保存 | 使用 `QuizAttemptEntity` |
-| `addMockInterview()` | `append` 数组 | 创建实体+保存 | 使用 `CareerEventEntity` |
+| `addSampleMilestone()` | `append` 数组 | 创建实体+保存 | 使用 `CareerEventEntity` |
 | `updateMastery(...)` | 数组索引修改 | 查询+修改实体 | 需先 Fetch 知识点 |
 | `scheduleFollowUpIfNeeded(...)` | `contains`+`insert` | 查询+创建实体 | 使用 `StudyTaskEntity` |
 | `recordDailyStudy(...)` | 无 | 新增方法 | 使用 `DailyStudyRecordEntity` |

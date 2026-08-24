@@ -1,11 +1,12 @@
 import WidgetKit
 import SwiftUI
+import AppIntents
 
 // MARK: - App Intent（iOS 17+）
 
-struct TodayTasksIntent: AppIntent {
-    static var title: LocalizedStringResource = "今日任务"
-    static var description: IntentDescription = IntentDescription("显示今日 Must 任务列表")
+struct TodayTasksIntent: WidgetConfigurationIntent {
+    static let title: LocalizedStringResource = "今日任务"
+    static let description = IntentDescription("显示今日 Must 任务列表")
     
     func perform() async throws -> some IntentResult {
         .result()
@@ -272,6 +273,7 @@ struct TodayTasksWidget: Widget {
 
 // MARK: - Preview
 
+#if FINALPILOT_ENABLE_PREVIEWS
 #Preview(as: .systemSmall) {
     TodayTasksWidget()
 } timeline: {
@@ -283,3 +285,4 @@ struct TodayTasksWidget: Widget {
 } timeline: {
     TodayTasksEntry.preview
 }
+#endif

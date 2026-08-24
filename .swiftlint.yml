@@ -28,7 +28,6 @@ opt_in_rules:
   - private_action                # IBOutlet 的 action 应为 private
   - private_outlet                # IBOutlet 应为 private
   - prohibited_super_call         # 禁止不应调用 super 的地方调用 super
-  - redundant_nil_init            # 移除冗余的 = nil 初始化
   - redundant_type_annotation     # 移除冗余类型注解
   - sorted_first_last             # 用 min/max 替代 sorted().first/last
   - static_operator               # 运算符应声明为 static
@@ -114,7 +113,7 @@ cyclomatic_complexity:
 nesting:
   type_level:
     warning: 2      # 类型嵌套层级
-  statement_level:
+  function_level:
     warning: 5      # 语句嵌套层级
 
 identifier_name:
@@ -155,8 +154,8 @@ indentation_width:
 trailing_comma:
   mandatory_comma: false
 
-# 闭包体长度
 # 闭包体长度（SwiftUI View body 闭包通常较长，放宽限制）
+closure_body_length:
   warning: 50
   error: 80
 

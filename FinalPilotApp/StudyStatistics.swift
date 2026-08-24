@@ -96,26 +96,25 @@ struct StudyStatistics {
     static func ebbinghausReviewSuggestions(attempts: [QuizAttempt]) -> [EbbinghausSuggestion] {
         let intervals: [TimeInterval] = [20 * 60, 60 * 60, 9 * 60 * 60, 86400, 172800, 518400, 2678400]
         let intervalLabels = ["20分钟后", "1小时后", "9小时后", "1天后", "2天后", "6天后", "31天后"]
-        let tolerance: Double = 1.5
+        let overdueTolerance: Double = 1.5
 
         let wrongAttempts = attempts.filter { !$0.isCorrect }
         var suggestions: [EbbinghausSuggestion] = []
 
         for attempt in wrongAttempts {
-            let elapsed = Date().timeIntervalSince(attempt.createdAt)
-            for (index, interval) in intervals.enumerated() {
-                if elapsed >= interval && elapsed < interval * tolerance {
-                    suggestions.append(EbbinghausSuggestion(
-                        questionID: attempt.questionID,
-                        knowledgePointID: attempt.knowledgePointID,
-                        stage: index,
-                        stageLabel: intervalLabels[index],
-                        elapsedHours: elapsed / 3600,
-                        isOverdue: elapsed > interval * 2
-                    ))
-                    break
-                }
-            }
+            let elapsed = max(0, Date().timeIntervalSince(attempt.createdAt))
+            guard let stage = intervals.indices.min(by: {
+                abs(elapsed - intervals[$0]) < abs(elapsed - intervals[$1])
+            }) else { continue }
+            let interval = intervals[stage]
+            suggestions.append(EbbinghausSuggestion(
+                questionID: attempt.questionID,
+                knowledgePointID: attempt.knowledgePointID,
+                stage: stage,
+                stageLabel: intervalLabels[stage],
+                elapsedHours: elapsed / 3600,
+                isOverdue: elapsed > interval * overdueTolerance
+            ))
         }
         return suggestions.sorted { $0.stage < $1.stage }
     }
@@ -160,6 +159,7 @@ struct StudyStatistics {
     // MARK: - 从 Store 生成每日记录
     /// 从 FinalPilotStore 的现有数据生成 DailyStudyRecord 数组。
     /// 用于在尚未接入 Core Data 时，从 attempts 和 tasks 反推每日学习数据。
+    @MainActor
     static func generateDailyRecords(from store: FinalPilotStore) -> [DailyStudyRecord] {
         var records: [DailyStudyRecord] = []
         let calendar = Calendar.current

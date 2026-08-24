@@ -100,7 +100,7 @@ enum NotificationContent {
             title: "🎯 高频错题集中突破",
             body: "你最近错了 \(wrongCount) 道题，\(topTopic) 是重灾区。集中 30 分钟专项突破，效果显著！"
         )
-    )
+    }
 
     // MARK: - 每日统计推送
 
@@ -154,7 +154,7 @@ enum NotificationContent {
 
 // MARK: - 提醒时段枚举
 
-enum ReminderTimeSlot: String, CaseIterable, Identifiable {
+enum ReminderTimeSlot: String, CaseIterable, Identifiable, Codable {
     case morning
     case afternoon
     case evening

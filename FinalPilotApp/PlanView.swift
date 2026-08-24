@@ -97,7 +97,7 @@ struct PlanView: View {
 
     private var dailyBaseline: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "每日保底", subtitle: "有面试时切 B 档，不补偿性熬夜")
+            SectionHeader(title: "每日保底", subtitle: "有临时事务时切 B 档，不补偿性熬夜")
             VStack(alignment: .leading, spacing: 8) {
                 Label("C310：1 个核心概念 + 1 道相关题", systemImage: "1.circle")
                 Label("E320：1 个公式 / 算法 + 1 道相关计算题", systemImage: "2.circle")
@@ -124,7 +124,7 @@ struct PlanView: View {
                         .background(AppTheme.orange, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("校招保温分支")
+                        Text("里程碑保温分支")
                             .font(.headline)
                             .foregroundStyle(AppTheme.ink)
                         Text(careerBranchSubtitle)
@@ -156,9 +156,9 @@ struct PlanView: View {
 
     private var careerBranchSubtitle: String {
         guard let event = store.careerEvents.sorted(by: { $0.date < $1.date }).first else {
-            return "校招不放在底部主导航；需要时进入这里看最低准备包。"
+            return "里程碑不放在底部主导航；需要时进入这里看最低准备包。"
         }
-        return "下一场：\(event.company) · \(event.round)，只保留最低准备包。"
+        return "下一项：\(event.company) · \(event.round)，只保留最低执行包。"
     }
 
     private func branchPill(title: String, value: String) -> some View {

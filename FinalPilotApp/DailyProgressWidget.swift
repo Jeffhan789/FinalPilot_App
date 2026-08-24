@@ -1,11 +1,12 @@
 import WidgetKit
 import SwiftUI
+import AppIntents
 
 // MARK: - App Intent（iOS 17+）
 
-struct DailyProgressIntent: AppIntent {
-    static var title: LocalizedStringResource = "每日进度"
-    static var description: IntentDescription = IntentDescription("显示今日学习进度环形图")
+struct DailyProgressIntent: WidgetConfigurationIntent {
+    static let title: LocalizedStringResource = "每日进度"
+    static let description = IntentDescription("显示今日学习进度环形图")
     
     func perform() async throws -> some IntentResult {
         .result()
@@ -215,8 +216,10 @@ struct DailyProgressWidget: Widget {
 
 // MARK: - Preview
 
+#if FINALPILOT_ENABLE_PREVIEWS
 #Preview(as: .systemSmall) {
     DailyProgressWidget()
 } timeline: {
     DailyProgressEntry.preview
 }
+#endif

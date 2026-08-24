@@ -7,7 +7,7 @@ import SwiftUI
 //        UIKit 会重新调用这个闭包，传入新的 `traitCollection`，获取对应的颜色。这是系统级的自动切换机制，
 //        不需要任何 `onChange` 或 `NotificationCenter` 监听。
 //        底层实现：UIColor 内部持有一个 ` UITraitCollection` 到 `CGColor` 的映射表，渲染时根据当前 trait 自动查表。
-// [面试] "SwiftUI 怎么支持深色模式？"
+// [设计复盘] "SwiftUI 怎么支持深色模式？"
 //        答：三种方案。1) `UIColor dynamicProvider`（本例）：最可靠，系统级自动切换，支持 Widget 和 App Clip；
 //        2) `@Environment(\.colorScheme)` + `if colorScheme == .dark` 条件渲染：灵活但代码冗余，每个 View 都要写判断；
 //        3) SwiftUI 的 `Color(uiColor:)` 直接包装 Dynamic UIColor。本方案选择方案 1 的原因是：
@@ -37,7 +37,7 @@ enum AppTheme {
     //          SwiftUI 的 `Color` 只是包装了 `UIColor`，真正渲染时 Core Animation 会根据当前 trait 自动选择正确的颜色。
     //        选择方案 2（本例）的另一个原因：App 的 `Color` 常量可以全局定义，不依赖任何 View 的生命周期或环境。
     //        如果每个 View 都用 `@Environment` 读取 `colorScheme` 再判断，代码会充斥大量条件分支，难以维护。
-    // [面试] "如果面试官问你的 Theme 设计，重点讲什么？"
+    // [设计复盘] "如果读者问你的 Theme 设计，重点讲什么？"
     //        答：重点讲三个设计决策。1) 暗色模式用 `UIColor dynamicProvider` 而不是 `@Environment(\.colorScheme)`，
     //        因为前者在渲染层自动切换，不需要重建 View，性能更优；2) 颜色分层：Base Colors（原始色值）→ Semantic Colors（用途语义，如 error/warning）
     //        → Surface Colors（界面层级，如 card/elevatedCard），层级清晰便于扩展；3) 动态适配函数（`adaptiveBackground` 等）
@@ -81,7 +81,7 @@ enum AppTheme {
     //        选择 `.topLeading` → `.bottomTrailing`（对角线）而不是 `.top` → `.bottom`（垂直），是因为对角线渐变更有"动感和层次感"，
     //        符合现代 UI 设计趋势（如 Apple 的 iOS 设置界面背景）。技术上，`startPoint` 和 `endPoint` 是单位坐标系（0-1），
     //        `.topLeading = (0, 0)`，`.bottomTrailing = (1, 1)`，`.top = (0.5, 0)` 等。
-    // [面试] "SwiftUI 的渐变是怎么实现的？性能怎么样？"
+    // [设计复盘] "SwiftUI 的渐变是怎么实现的？性能怎么样？"
     //        答：`LinearGradient` 是 Core Graphics 的 `CGGradient` 上层封装。渲染时 GPU 对渐变区域进行线性插值着色，
     //        性能极好（单次绘制开销与普通纯色填充几乎相同）。但要注意：如果渐变颜色变化频繁（如动画中每帧改变 `colors`），
     //        会触发 GPU 重新生成纹理，开销较大。优化方案：用 `Color` 的 `opacity` 变化模拟渐变亮度变化，而不是改变 `colors` 数组。
@@ -143,7 +143,7 @@ enum AppTheme {
     //        动态函数接受 `ColorScheme` 参数，可以在运行时根据条件选择不同色值（如阴影深浅需要根据当前 scheme 动态调整）。
     //        为什么需要两者？因为有些场景无法通过 Dynamic UIColor 表达，如 `shadow(color:radius:x:y:)` 的阴影颜色需要同时知道 `colorScheme`
     //        来决定不透明度（light 下 0.06，dark 下 0.3）。如果硬编码固定 opacity，在某一模式下会太弱或太强。
-    // [面试] "你的 Theme 为什么同时有静态常量和动态函数？不会重复吗？"
+    // [设计复盘] "你的 Theme 为什么同时有静态常量和动态函数？不会重复吗？"
     //        答：不是重复，是互补。静态常量（`primary`、`background` 等）用于 90% 的场景——文字、背景、按钮颜色，
     //        它们使用 `UIColor dynamicProvider`，系统会自动切换，不需要任何额外代码。动态函数（`adaptiveBackground`、`adaptiveCard` 等）
     //        用于需要运行时判断 colorScheme 的复杂场景，如阴影深浅、border 颜色、或者与外部数据源（服务器返回的图片/颜色）混合时。
@@ -167,7 +167,7 @@ enum AppTheme {
     //        用函数而非静态常量的原因：1) 参数是枚举或字符串，运行时才能确定；2) 映射关系可能随业务变化，集中在一处便于维护；
     //        3) 可以统一处理 fallback（如 unknown key 返回 primary）。
     //        这些函数也使用了 `Color(light:dark:)` 初始化器，说明业务颜色同样需要适配暗色模式。
-    // [面试] "Theme 中的业务颜色和基础颜色有什么区别？"
+    // [设计复盘] "Theme 中的业务颜色和基础颜色有什么区别？"
     //        答：基础颜色（primary/orange/green 等）是"视觉原子"，不携带业务含义；业务颜色（courseColor/phaseColor 等）是"语义映射"，
     //        将业务状态/枚举映射到具体的视觉颜色。分层的好处是：当品牌色改变时，只需改基础颜色，业务颜色自动跟随；
     //        当业务逻辑变化时（如新增 sprint phase），只需在语义映射函数中增加 case，不影响基础色板。
@@ -218,7 +218,7 @@ enum AppTheme {
     //        这是因为暗色模式的界面本身已经很深，如果阴影保持同样不透明度，几乎不可见，导致层级感丢失。
     //        这个逻辑无法用 Dynamic UIColor 表达，因为 Dynamic UIColor 只映射"颜色值"，而这里的 opacity 需要根据 scheme 动态计算。
     //        这就是 Theme 同时提供静态常量（Color(light:dark:)）和动态函数（adaptive*）的原因。
-    // [面试] "暗色模式下阴影怎么处理？有什么坑？"
+    // [设计复盘] "暗色模式下阴影怎么处理？有什么坑？"
     //        答：坑在于"暗色模式的阴影要更深而不是更浅"。直觉上 dark 模式应该降低阴影强度，但实际 UI 体验是：
     //        dark 背景已经很深，如果阴影保持 light 模式的 0.06 opacity，几乎看不见，卡片会贴在背景上，没有悬浮感。
     //        正确做法：dark 模式阴影 opacity 提升到 0.3 甚至 0.4，同时略微增加 radius。
@@ -240,7 +240,7 @@ enum AppTheme {
     //        所有使用 `sectionTitle` 的地方自动更新。这比分散在各 View 中的硬编码颜色更容易维护。
     //        这些函数也展示了 Dynamic Helpers 的另一种用法：它们内部可能调用 `adaptiveInk` 或自定义逻辑，
     //        封装了"何时用 ink、何时用其他色"的判断。
-    // [面试] "你的 Theme 怎么保证全局颜色一致性？"
+    // [设计复盘] "你的 Theme 怎么保证全局颜色一致性？"
     //        答：通过三层防护。1) Token 化：所有颜色通过 Theme 常量/函数获取，禁止 View 中硬编码 Color(red:green:blue:)；
     //        2) 语义化：用 `sectionTitle`、`bodyText`、`courseColor` 等语义函数，而非直接使用 `primary`、`ink` 等基础色；
     //        3) 强制适配：所有颜色都必须通过 `Color(light:dark:)` 或 `adaptive*` 函数提供 dark 版本，不允许"只适配 light 模式"。
@@ -262,7 +262,7 @@ enum AppTheme {
 //        另一个好处是方便单元测试：可以单独测试 `ThemedBackground` 是否应用了正确的背景色，而不需要创建整个 View 树。
 //        这里 `ThemedBackground` 用 `@Environment(\.colorScheme)` 读取当前模式，是因为 Modifier 也是 View 的参与者，
 //        可以访问环境值。与 Theme 静态常量的 `UIColor dynamicProvider` 不冲突——后者在渲染层切换，前者在构建时读取。
-// [面试] "SwiftUI 中 ViewModifier 和自定义 View 有什么区别？"
+// [设计复盘] "SwiftUI 中 ViewModifier 和自定义 View 有什么区别？"
 //        答：`ViewModifier` 是"样式装饰器"，只修改现有 View 的外观（如背景、阴影、动画），不引入新的语义；
 //        自定义 View（`struct MyView: View`）是"组件封装"，引入新的 UI 语义（如 `CourseCard`、`TaskRow`）。
 //        选择原则：如果只是样式的组合（背景+圆角+阴影），用 `ViewModifier`；如果需要新的业务语义和数据绑定，用自定义 View。
@@ -318,7 +318,7 @@ extension View {
 //        外部的状态栏、系统弹窗等不会受影响。
 //        为什么这里用 VStack 叠加 light/dark 两个预览？因为 SwiftUI Preview 默认只展示一种模式，
 //        通过叠加可以在 Xcode Canvas 中同时看到两种模式效果，极大提升 UI 调试效率。
-// [面试] "怎么在 SwiftUI Preview 中同时看到 light 和 dark 模式？"
+// [设计复盘] "怎么在 SwiftUI Preview 中同时看到 light 和 dark 模式？"
 //        答：标准方案有三种。1) 用 `.preferredColorScheme` 叠加两个 View（本例），在一个 Preview 中并排/上下展示两种模式；
 //        2) 使用 `ForEach([ColorScheme.light, .dark], id: \.self) { scheme in ... }` 结合 `.preferredColorScheme(scheme)`
 //        让 Xcode 自动生成两个 preview 标签页；3) 在 Preview 的右上角切换器手动切换。方案 1 最直观，适合快速对比。

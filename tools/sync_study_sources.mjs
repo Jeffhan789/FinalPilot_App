@@ -33,7 +33,7 @@ const scoreRules = [
   [/A4-两周复习进度规划表/i, 88, "a4_plan"],
   [/执行清单|今日复习记录|Day\d|Day[一二三四五六七八九十]/i, 82, "execution_log"],
   [/真题矩阵|错题|错因|复盘/i, 74, "practice_feedback"],
-  [/科学复习计划|面试缓冲|A.?B.?C|三档/i, 64, "scheduling_rule"],
+  [/科学复习计划|机动缓冲|A.?B.?C|三档/i, 64, "scheduling_rule"],
   [/资料索引|打印清单|笔记规范|题型整理/i, 48, "reference_index"]
 ];
 

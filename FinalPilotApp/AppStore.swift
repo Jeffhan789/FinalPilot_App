@@ -1,6 +1,7 @@
 import Foundation
 import CoreData
 
+@MainActor
 final class FinalPilotStore: ObservableObject {
     @Published var courses: [Course]
     @Published var tasks: [StudyTask]
@@ -8,14 +9,17 @@ final class FinalPilotStore: ObservableObject {
     @Published var sprintPlanDays: [SprintPlanDay]
     @Published var flashcards: [KnowledgeFlashcard]
     @Published var attempts: [QuizAttempt]
-    
+
+    private let sideEffectsEnabled: Bool
+
     // MARK: - Core Data Context
     // `context` 通过单例懒加载，保持与 DataController 的生命周期绑定
     // 这里不直接持有 `NSManagedObjectContext`，而是通过 `DataController.shared.viewContext` 间接访问。
     //        好处：1) 如果 DataController 初始化失败，这里返回 nil 而不是崩溃；2) 如果将来需要切换上下文（如支持多用户），
     //        只需修改 DataController 一处，Store 无需改动。`guard let context = context` 的防御性编程在 Core Data 操作中很必要。
     private var context: NSManagedObjectContext? {
-        DataController.shared.viewContext
+        guard sideEffectsEnabled else { return nil }
+        return DataController.shared.viewContext
     }
 
     init(
@@ -24,7 +28,8 @@ final class FinalPilotStore: ObservableObject {
         careerEvents: [CareerEvent] = SeedData.careerEvents,
         sprintPlanDays: [SprintPlanDay] = SeedData.sprintPlanDays,
         flashcards: [KnowledgeFlashcard] = SeedData.flashcards,
-        attempts: [QuizAttempt] = []
+        attempts: [QuizAttempt] = [],
+        sideEffectsEnabled: Bool = true
     ) {
         self.courses = courses
         self.tasks = tasks
@@ -32,6 +37,7 @@ final class FinalPilotStore: ObservableObject {
         self.sprintPlanDays = sprintPlanDays
         self.flashcards = flashcards
         self.attempts = attempts
+        self.sideEffectsEnabled = sideEffectsEnabled
     }
 
     var nearestExam: Course? {
@@ -103,7 +109,7 @@ final class FinalPilotStore: ObservableObject {
         //        这里通过 `StudyReminderScheduler` 单例委托，保持了 Store 的单一职责：只管理数据和状态，不直接操作通知系统。
         //        如果将来需要把通知改为弹窗或积分系统，只需修改调度器，Store 无需改动。
         // 通知反馈
-        if !wasDone {
+        if sideEffectsEnabled && !wasDone {
             StudyReminderScheduler.shared.sendTaskCompletionEncouragement(task: task)
         }
         
@@ -112,7 +118,9 @@ final class FinalPilotStore: ObservableObject {
         //        所以必须先完成 Core Data 保存，再刷新 Widget。如果先刷新 Widget 再保存 Core Data，Widget 可能读到旧数据。
         //        实际调用 `WidgetCenter.shared.reloadAllTimelines()` 是异步操作，App 不需要等待它完成。
         // Widget 同步
-        syncToWidget()
+        if sideEffectsEnabled {
+            syncToWidget()
+        }
     }
 
     func deferTask(_ task: StudyTask) {
@@ -120,7 +128,9 @@ final class FinalPilotStore: ObservableObject {
         tasks[index].status = .deferred
         tasks[index].bucket = .skip
         persistTask(tasks[index])
-        syncToWidget()
+        if sideEffectsEnabled {
+            syncToWidget()
+        }
     }
 
     // MARK: submitAnswer - 答题提交与掌握度反馈闭环
@@ -163,27 +173,31 @@ final class FinalPilotStore: ObservableObject {
         persistQuizAttempt(attempt)
         
         // 连续答对鼓励
-        let recentCorrect = attempts.prefix(3).allSatisfy { $0.isCorrect }
-        if recentCorrect {
+        let hasThreeCorrectAnswers = attempts.count >= 3 && attempts.prefix(3).allSatisfy { $0.isCorrect }
+        if sideEffectsEnabled && hasThreeCorrectAnswers {
             StudyReminderScheduler.shared.sendStreakEncouragement(correctCount: 3)
         }
-        
-        syncToWidget()
+
+        if sideEffectsEnabled {
+            syncToWidget()
+        }
         return attempt
     }
 
-    func addMockInterview() {
+    func addSampleMilestone() {
         let event = CareerEvent(
             id: UUID().uuidString,
-            company: "新增公司",
-            role: "iOS 开发实习",
-            round: "模拟技术面",
+            company: "新增里程碑",
+            role: "自定义事务",
+            round: "待执行",
             date: .finalPilotDate(month: 5, day: 10, hour: 15),
             importance: 3,
-            preparationStatus: "等待准备"
+            preparationStatus: "等待拆解"
         )
         careerEvents.append(event)
-        syncToWidget()
+        if sideEffectsEnabled {
+            syncToWidget()
+        }
     }
 
     // MARK: daysUntil - 跨时区考试倒计时计算
@@ -216,41 +230,6 @@ final class FinalPilotStore: ObservableObject {
     //        2) 待办任务列表（WidgetTaskInfo）；3) 学习进度统计（WidgetProgressInfo）。
     //        选择 UserDefaults 而非 Core Data 共享容器的原因是：Widget 数据量小、结构简单、更新频繁，
     //        UserDefaults 的键值读写性能更优，且避免了 Core Data 并发上下文的复杂性。
-    func syncToWidget() {
-        // 同步考试信息
-        let examInfos = courses.compactMap { course -> WidgetExamInfo? in
-            guard let days = daysUntil(course.examDate) else { return nil }
-            return WidgetExamInfo(
-                id: course.id,
-                name: course.name.prefixName,
-                daysUntil: days,
-                examDate: course.examDate ?? Date()
-            )
-        }
-        WidgetDataProvider.shared.saveExams(examInfos)
-        
-        // 同步任务
-        let taskInfos = tasks.filter { $0.bucket == .must && $0.status != .done }.map { task -> WidgetTaskInfo in
-            WidgetTaskInfo(
-                id: task.id,
-                title: task.title,
-                subtitle: task.subtitle,
-                minutes: task.minutes,
-                isCompleted: task.status == .done
-            )
-        }
-        WidgetDataProvider.shared.saveTasks(taskInfos)
-        
-        // 同步进度
-        let progress = WidgetProgressInfo(
-            completionRate: completionRate,
-            studyMinutes: totalStudyMinutes,
-            totalTasks: tasks.filter { $0.bucket != .skip }.count,
-            completedTasks: tasks.filter { $0.status == .done }.count
-        )
-        WidgetDataProvider.shared.saveProgress(progress)
-    }
-
     // MARK: - Core Data Persistence
     
     // MARK: persistTask - Core Data 任务持久化（Upsert 模式）
@@ -390,7 +369,9 @@ final class FinalPilotStore: ObservableObject {
         persistTask(task)
         
         // 错题回顾通知
-        StudyReminderScheduler.shared.scheduleMistakeReviewReminders(store: self)
+        if sideEffectsEnabled {
+            StudyReminderScheduler.shared.scheduleMistakeReviewReminders(store: self)
+        }
     }
 
     private func bucketOrder(_ bucket: TaskBucket) -> Int {

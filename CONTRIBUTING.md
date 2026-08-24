@@ -6,7 +6,7 @@
 
 ### 报告 Bug
 
-如果您发现了 Bug，请通过 [GitHub Issues](../../issues) 提交，并使用我们提供的 **Bug 报告模板** 填写以下信息：
+如果您发现了 Bug，请通过 [GitHub Issues](https://github.com/Jeffhan789/FinalPilot/issues) 提交，并使用我们提供的 **Bug 报告模板** 填写以下信息：
 
 - 问题描述（发生了什么）
 - 复现步骤（如何触发）
@@ -96,7 +96,7 @@ FinalPilotApp/
 ├── CoursesView.swift            # 课程列表
 ├── PracticeView.swift           # 练习/测验
 ├── AnalyticsView.swift          # 学习统计
-├── CareerView.swift             # 校招相关
+├── CareerView.swift             # 里程碑相关
 ├── FinalPilot.xcdatamodeld/     # Core Data 模型
 └── Assets.xcassets/             # 图片资源
 ```
@@ -118,8 +118,8 @@ FinalPilotApp/
 
 ## 许可证
 
-本项目采用 [MIT 许可证](../../LICENSE) 开源。
+本项目采用 [MIT 许可证](LICENSE) 开源。
 
 ---
 
-如有任何疑问，欢迎通过 [GitHub Discussions](../../discussions) 交流！
+如有任何疑问，欢迎通过 [GitHub Discussions](https://github.com/Jeffhan789/FinalPilot/discussions) 交流！

@@ -312,8 +312,6 @@ struct AnalyticsView: View {
                 } else {
                     GeometryReader { geometry in
                         let size = min(geometry.size.width, geometry.size.height)
-                        let radius = size / 2
-                        let center = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
                         ZStack {
                             ForEach(0..<knowledgeDistribution.count, id: \.self) { index in
                                 let startAngle = knowledgeDistribution.prefix(index).reduce(0) { $0 + $1.percentage } * 360 - 90

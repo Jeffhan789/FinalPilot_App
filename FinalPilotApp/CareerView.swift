@@ -6,8 +6,8 @@ struct CareerView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                SectionHeader(title: "校招保温", subtitle: "C310/E320 考前只做最低准备，不展开大工程")
-                nextInterview
+                SectionHeader(title: "里程碑保温", subtitle: "C310/E320 考前只做最低准备，不展开大工程")
+                nextMilestone
                 minimumPack
                 projectPitch
                 careerTimeline
@@ -15,19 +15,19 @@ struct CareerView: View {
             .padding()
         }
         .background(AppTheme.background.ignoresSafeArea())
-        .navigationTitle("校招")
+        .navigationTitle("里程碑")
         .toolbar {
             Button {
-                store.addMockInterview()
+                store.addSampleMilestone()
             } label: {
                 Image(systemName: "plus")
             }
         }
     }
 
-    private var nextInterview: some View {
+    private var nextMilestone: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "下一场面试", subtitle: "如与考试冲突，只保留最低准备包")
+            SectionHeader(title: "下一项里程碑", subtitle: "如与考试冲突，只保留最低准备包")
 
             if let event = store.careerEvents.sorted(by: { $0.date < $1.date }).first {
                 VStack(alignment: .leading, spacing: 12) {
@@ -61,13 +61,13 @@ struct CareerView: View {
 
     private var minimumPack: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "Career Minimum Pack", subtitle: "突发面试前至少有这 5 件东西")
+            SectionHeader(title: "里程碑检查单", subtitle: "临时事务前先确认这 5 项")
             let items = [
-                ("1 分钟自我介绍", "person.text.rectangle"),
-                ("2 分钟 学呀学 项目介绍", "app.badge"),
-                ("3 个技术亮点：多智能体、本地快照、掌握度预测", "sparkles"),
-                ("3 个常见问题回答", "questionmark.bubble"),
-                ("1 个反问面试官的问题", "arrowshape.turn.up.left")
+                ("明确完成标准与截止时间", "checkmark.seal"),
+                ("拆出一个 20 分钟可执行动作", "timer"),
+                ("记录依赖、风险与阻塞项", "exclamationmark.triangle"),
+                ("预留复盘与资料归档时间", "archivebox"),
+                ("确认不会挤占考试主线", "arrow.triangle.branch")
             ]
             ForEach(items, id: \.0) { title, icon in
                 HStack(spacing: 12) {
@@ -88,12 +88,12 @@ struct CareerView: View {
 
     private var projectPitch: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "项目讲解卡", subtitle: "校招展示时按这个顺序讲")
+            SectionHeader(title: "任务复盘卡", subtitle: "按这个顺序记录一次调度决策")
             VStack(alignment: .leading, spacing: 12) {
-                pitchLine(number: "1", title: "背景", text: "期末考试和校招面试并行，用户需要冲刺调度。")
-                pitchLine(number: "2", title: "核心", text: "Exam Track 优先，Career Track 保温。")
-                pitchLine(number: "3", title: "技术", text: "SwiftUI + 本地快照 + 多智能体 + 掌握度预测。")
-                pitchLine(number: "4", title: "亮点", text: "ConflictAgent 自动处理任务冲突。")
+                pitchLine(number: "1", title: "背景", text: "期末考试和机动事务并行，用户需要冲刺调度。")
+                pitchLine(number: "2", title: "核心", text: "Exam Track 优先，Flex Track 保温。")
+                pitchLine(number: "3", title: "约束", text: "截止时间、精力上限与依赖关系共同决定优先级。")
+                pitchLine(number: "4", title: "结果", text: "ConflictAgent 自动压缩、合并或延期冲突任务。")
             }
             .padding(16)
             .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 8))
@@ -102,7 +102,7 @@ struct CareerView: View {
 
     private var careerTimeline: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "面试时间线", subtitle: "MVP 暂时手动维护，后续再接日历或邮箱")
+            SectionHeader(title: "里程碑时间线", subtitle: "MVP 暂时手动维护，后续再接日历或邮箱")
             ForEach(store.careerEvents.sorted(by: { $0.date < $1.date })) { event in
                 HStack(spacing: 12) {
                     Circle()

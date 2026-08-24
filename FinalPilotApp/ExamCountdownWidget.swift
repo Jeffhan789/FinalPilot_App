@@ -1,11 +1,12 @@
 import WidgetKit
 import SwiftUI
+import AppIntents
 
 // MARK: - App Intent（iOS 17+）
 
-struct ExamCountdownIntent: AppIntent {
-    static var title: LocalizedStringResource = "考试倒计时"
-    static var description: IntentDescription = IntentDescription("显示即将到来的考试倒计时")
+struct ExamCountdownIntent: WidgetConfigurationIntent {
+    static let title: LocalizedStringResource = "考试倒计时"
+    static let description = IntentDescription("显示即将到来的考试倒计时")
     
     @Parameter(title: "考试筛选", default: .all)
     var filter: ExamFilter
@@ -14,16 +15,12 @@ struct ExamCountdownIntent: AppIntent {
         case all
         case nearest
         
-        static var typeDisplayRepresentation: TypeDisplayRepresentation {
-            TypeDisplayRepresentation(name: "考试筛选")
-        }
+        static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "考试筛选")
         
-        static var caseDisplayRepresentations: [ExamFilter: DisplayRepresentation] {
-            [
-                .all: DisplayRepresentation(title: "全部考试"),
-                .nearest: DisplayRepresentation(title: "最近考试")
-            ]
-        }
+        static let caseDisplayRepresentations: [ExamFilter: DisplayRepresentation] = [
+            .all: DisplayRepresentation(title: "全部考试"),
+            .nearest: DisplayRepresentation(title: "最近考试")
+        ]
     }
     
     func perform() async throws -> some IntentResult {
@@ -267,6 +264,7 @@ struct ExamCountdownWidget: Widget {
 
 // MARK: - Preview
 
+#if FINALPILOT_ENABLE_PREVIEWS
 #Preview(as: .systemSmall) {
     ExamCountdownWidget()
 } timeline: {
@@ -278,3 +276,4 @@ struct ExamCountdownWidget: Widget {
 } timeline: {
     ExamCountdownEntry.preview
 }
+#endif

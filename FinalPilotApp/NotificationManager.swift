@@ -4,6 +4,7 @@ import SwiftUI
 
 /// 本地通知管理器，负责权限请求、通知调度与取消
 /// 所有通知内容均为中文，适配 FinalPilot 学呀学考试冲刺场景
+@MainActor
 final class NotificationManager: ObservableObject {
     static let shared = NotificationManager()
 
@@ -49,9 +50,12 @@ final class NotificationManager: ObservableObject {
     /// 检查当前通知授权状态
     func checkAuthorizationStatus() {
         center.getNotificationSettings { [weak self] settings in
+            // UNNotificationSettings is not Sendable under Swift 6. Extract the
+            // value type before hopping back to the main actor.
+            let status = settings.authorizationStatus
             DispatchQueue.main.async {
-                self?.authorizationStatus = settings.authorizationStatus
-                self?.isNotificationsEnabled = settings.authorizationStatus == .authorized
+                self?.authorizationStatus = status
+                self?.isNotificationsEnabled = status == .authorized
             }
         }
     }
@@ -244,11 +248,10 @@ final class NotificationManager: ObservableObject {
     // MARK: - 已调度通知查询
 
     /// 获取当前所有待发送的通知列表
-    func getPendingNotifications(completion: @escaping ([UNNotificationRequest]) -> Void) {
+    /// 回调由 UserNotifications 的系统队列执行；调用方如需更新 UI，应自行切换到主线程。
+    func getPendingNotifications(completion: @escaping @Sendable ([UNNotificationRequest]) -> Void) {
         center.getPendingNotificationRequests { requests in
-            DispatchQueue.main.async {
-                completion(requests)
-            }
+            completion(requests)
         }
     }
 }

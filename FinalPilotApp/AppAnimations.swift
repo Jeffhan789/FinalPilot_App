@@ -74,7 +74,7 @@ struct ConfettiView: View {
 
                     guard opacity > 0, y < size.height + 50, y > -50, x > -50, x < size.width + 50 else { continue }
 
-                    var transform = CGAffineTransform.identity
+                    let transform = CGAffineTransform.identity
                         .translatedBy(x: x, y: y)
                         .rotated(by: rotation)
 
@@ -193,7 +193,7 @@ extension View {
 //        而是：1) 读取 `animatableData` 的当前值；2) 计算目标值与当前值的差值；3) 在动画时长内，每帧通过 easing 函数
 //        计算中间值，写回 `animatableData`；4) 触发 `body` 重绘。所以 `AnimatedNumber` 的 `body` 每帧显示的是插值过程中的数字，
 //        形成数字滚动的效果。`monospacedDigit()` 确保数字等宽，防止宽度变化导致布局抖动。
-struct AnimatedNumber: View, Animatable {
+struct AnimatedNumber: View, @preconcurrency Animatable {
     var value: Double
     var formatter: (Double) -> String = { String(format: "%.0f", $0) }
 

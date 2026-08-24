@@ -7,6 +7,7 @@ import SwiftUI
 // Core Data 的 NSPersistentContainer 是重量级对象（初始化需加载模型文件、创建 SQLite 连接、配置线程队列）。
 //        如果每次用都创建新实例，会导致：1) 内存重复分配；2) 数据库连接数暴涨；3) 多上下文写入冲突。
 //        单例模式确保整个 App 生命周期内只有一个容器实例，所有 NSManagedObjectContext 都指向同一持久化栈。
+@MainActor
 final class DataController: ObservableObject {
     // 单例的 `static let shared` 是线程安全的延迟初始化
     // Swift 的 `static let` 由运行时自动保证线程安全（内部使用 dispatch_once 语义），无需手动加锁。
@@ -104,7 +105,9 @@ final class DataController: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.save()
+            Task { @MainActor [weak self] in
+                self?.save()
+            }
         }
 
         NotificationCenter.default.addObserver(
@@ -112,13 +115,15 @@ final class DataController: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.save()
+            Task { @MainActor [weak self] in
+                self?.save()
+            }
         }
     }
 
     // MARK: - Preview
 
-    static var preview: DataController = {
+    static let preview: DataController = {
         let controller = DataController(inMemory: true)
         CoreDataMigrationHelper.migrateSeedDataIfNeeded(context: controller.viewContext)
         return controller

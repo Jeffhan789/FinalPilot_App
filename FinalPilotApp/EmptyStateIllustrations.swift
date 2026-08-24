@@ -214,8 +214,8 @@ struct EmptyCareerState: View {
             primaryIcon: "briefcase",
             secondaryIcon: "bell",
             tertiaryIcon: "doc.text",
-            title: "暂无校招事件",
-            message: "添加笔试、面试等校招事件，系统会帮你追踪准备进度和提醒时间",
+            title: "暂无里程碑事件",
+            message: "添加发布、课程或个人里程碑，系统会帮你追踪执行进度和提醒时间",
             accentColor: AppTheme.orange
         )
     }

@@ -9,14 +9,14 @@ enum TaskTrack: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .exam: "Exam Track"
-        case .career: "Career Track"
+        case .career: "Flex Track"
         }
     }
 
     var subtitle: String {
         switch self {
         case .exam: "考试优先，先保住 C310 / E320"
-        case .career: "校招保温，只保留高收益短任务"
+        case .career: "里程碑保温，只保留高收益短任务"
         }
     }
 

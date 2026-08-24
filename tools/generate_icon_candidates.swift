@@ -304,7 +304,7 @@ let variants: [IconVariant] = [
         drawText("學", in: CGRect(x: side * 0.29, y: side * 0.40, width: side * 0.42, height: side * 0.32), size: side * 0.25, weight: .black, fill: RGB(0.03, 0.21, 0.30))
         drawText("XYX", in: CGRect(x: side * 0.23, y: side * 0.24, width: side * 0.54, height: side * 0.12), size: side * 0.080, weight: .heavy, fill: RGB(0.98, 0.65, 0.20), kern: side * 0.012)
     },
-    IconVariant(number: 5, key: "minimal_xue", title: "05 极简学", subtitle: "面试作品集感") { context, side in
+    IconVariant(number: 5, key: "minimal_xue", title: "05 极简学", subtitle: "设计复盘开源项目感") { context, side in
         drawGradient(context, side, [RGB(0.94, 0.96, 0.90), RGB(0.78, 0.92, 0.88), RGB(0.11, 0.36, 0.38)])
         let circle = CGRect(x: side * 0.15, y: side * 0.15, width: side * 0.70, height: side * 0.70)
         context.setFillColor(cg(RGB(0.03, 0.16, 0.18)))

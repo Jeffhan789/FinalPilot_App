@@ -54,7 +54,7 @@
       "E320 官方课件 + 公式/算法笔记",
       "E320 tutorial / past paper 计算题",
       "真题矩阵 / 错题重做 / 主动回忆",
-      "面试准备 / 面试 / 突发事务缓冲"
+      "机动事务 / 设计复盘 / 突发事务缓冲"
     ],
     "career_buffer_minutes": [90, 120]
   },
@@ -63,13 +63,13 @@
       "id": "mode_a",
       "name": "A 正常日",
       "net_study_hours": "6-7",
-      "rule": "C310 两块，E320 两块，真题/错题一块，面试缓冲一块。"
+      "rule": "C310 两块，E320 两块，真题/错题一块，机动缓冲一块。"
     },
     {
       "id": "mode_b",
-      "name": "B 有面试日",
+      "name": "B 有临时事务日",
       "net_study_hours": "3-4",
-      "rule": "C310 一块，E320 一块，真题/错题 30-45 分钟，面试准备与复盘优先。"
+      "rule": "C310 一块，E320 一块，真题/错题 30-45 分钟，机动事务与复盘优先。"
     },
     {
       "id": "mode_c",
@@ -286,7 +286,7 @@
       "id": "task_career_buffer",
       "track": "career",
       "bucket": "should",
-      "title": "面试 / 突发缓冲",
+      "title": "设计复盘 / 突发缓冲",
       "minutes": 90,
       "source": "README-总计划.md"
     }

@@ -7,6 +7,7 @@ import UserNotifications
 // UserNotifications 框架是系统级服务，UNUserNotificationCenter 是单例（`UNUserNotificationCenter.current()`）。
 //        本调度器作为 App 层的通知管理门面（Facade），封装了：权限检查、内容生成、时机计算、通知调度四大职责。
 //        所有通知操作都经过这里，避免分散在各业务逻辑中，便于统一管理通知 ID 命名规范、防止重复调度、控制频率配额。
+@MainActor
 final class StudyReminderScheduler: ObservableObject {
     static let shared = StudyReminderScheduler()
 
@@ -260,7 +261,7 @@ final class StudyReminderScheduler: ObservableObject {
     //        但如果有多个错题，不能同时发多条通知（用户会被轰炸），所以用 `index * 30` 错开发送：
     //        第 1 题 60 分钟后、第 2 题 90 分钟后、第 3 题 120 分钟后……保证用户一次只收到一条回顾提醒，有足够精力处理。
     //        只取最近 5 条错题（`prefix(5)`），是因为：1) 错题太多时分批处理更高效；2) 太旧的错题可能已经通过其他方式复习过了。
-    private func scheduleMistakeReviewReminders(store: FinalPilotStore) {
+    func scheduleMistakeReviewReminders(store: FinalPilotStore) {
         let wrongAttempts = store.attempts.filter { !$0.isCorrect }.prefix(5)
 
         for (index, attempt) in wrongAttempts.enumerated() {

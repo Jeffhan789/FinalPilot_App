@@ -18,8 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # 主构建任务
-  build-and-lint:
+  build-and-test:
     # 使用 macOS 运行器，自带 Xcode 环境
     runs-on: macos-15
 
@@ -31,50 +30,60 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      # 步骤 2：选择 Xcode 版本（确保支持 iPhone 16 模拟器）
-      - name: 设置 Xcode 版本
+      - name: 打印构建环境
         run: |
-          sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
-          xcodebuild -version
-
-      # 步骤 3：显示环境信息（方便排错）
-      - name: 打印环境信息
-        run: |
-          echo "=== Swift 版本 ==="
           swift --version
-          echo "=== Xcode 版本 ==="
           xcodebuild -version
-          echo "=== 可用模拟器 ==="
-          xcrun simctl list devices available | grep -i "iPhone 16" || true
+          xcodebuild -list -project FinalPilotApp.xcodeproj
 
-      # 步骤 4：构建验证（使用通用 iOS 模拟器，无需代码签名）
-      - name: 构建验证（xcodebuild）
+      - name: 选择可用 iPhone 模拟器
+        id: simulator
         run: |
-          # 列出所有可用 iPhone 模拟器，选择第一个可用的
-          DEVICE_ID=$(xcrun simctl list devices available | grep -i "iPhone" | grep -v "Plus" | head -1 | grep -oE '[A-F0-9-]{36}' || true)
+          DEVICE_ID=$(xcrun simctl list devices available -j | jq -r '[.devices[][] | select(.isAvailable and (.name | startswith("iPhone")))][0].udid // empty')
           if [ -z "$DEVICE_ID" ]; then
-            echo "未找到可用 iPhone 模拟器，使用 generic 目标"
-            DESTINATION="platform=iOS Simulator,generic"
-          else
-            echo "使用模拟器 ID: $DEVICE_ID"
-            DESTINATION="platform=iOS Simulator,id=$DEVICE_ID"
+            echo "No available iPhone simulator is installed on this runner." >&2
+            exit 1
           fi
+          echo "id=$DEVICE_ID" >> "$GITHUB_OUTPUT"
+
+      - name: 构建并执行单元测试
+        run: |
+          set +e
           xcodebuild \
             -project FinalPilotApp.xcodeproj \
             -scheme FinalPilotApp \
             -configuration Debug \
-            -sdk iphonesimulator \
-            -destination "$DESTINATION" \
-            -derivedDataPath ${{ runner.temp }}/DerivedData \
+            -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.id }}" \
+            -derivedDataPath "${{ runner.temp }}/DerivedData" \
+            -resultBundlePath "${{ runner.temp }}/FinalPilotTests.xcresult" \
             CODE_SIGNING_ALLOWED=NO \
-            build || true
+            test
+          status=$?
+          set -e
 
-      # 步骤 5：代码规范检查（仅当 .swiftlint.yml 存在时执行）
+          if [ "$status" -ne 0 ]; then
+            echo "::group::XCTest result summary"
+            xcrun xcresulttool get test-results summary \
+              --path "${{ runner.temp }}/FinalPilotTests.xcresult" || true
+            xcrun xcresulttool get test-results tests \
+              --path "${{ runner.temp }}/FinalPilotTests.xcresult" || true
+            echo "::endgroup::"
+          fi
+
+          exit "$status"
+
+  lint:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
       - name: 安装 SwiftLint
-        if: hashFiles('.swiftlint.yml') != ''
         run: brew install swiftlint
 
       - name: 执行 SwiftLint 检查
-        if: hashFiles('.swiftlint.yml') != ''
+        # Existing style warnings remain visible while correctness rules with
+        # error severity continue to gate the build. This avoids converting the
+        # whole historical style backlog into an unrelated release blocker.
         run: swiftlint lint --reporter github-actions-logging
-        # 使用 github-actions-logging 报告器，可在 PR 中直接显示警告位置
